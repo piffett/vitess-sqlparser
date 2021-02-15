@@ -27,6 +27,11 @@ func TestSelectParsing(t *testing.T) {
 	checkErr(t, err)
 }
 
+func TestSelectParsingWithWith(t *testing.T) {
+	_, err := Parse(`WITH us as (select * from users) select * from us`)
+	checkErr(t, err)
+}
+
 func TestCreateTableParsing(t *testing.T) {
 	_, err := Parse(`
 		CREATE TABLE users (

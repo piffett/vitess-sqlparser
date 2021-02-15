@@ -182,6 +182,7 @@ type Select struct {
 	OrderBy     OrderBy
 	Limit       *Limit
 	Lock        string
+	With        TableExprs
 }
 
 // Select.Distinct

@@ -158,7 +158,7 @@ func forceEOF(yylex interface{}) {
 %type <selectExprs> select_expression_list select_expression_list_opt
 %type <selectExpr> select_expression
 %type <expr> expression
-%type <tableExprs> from_opt table_references
+%type <tableExprs> from_opt table_references with_opt
 %type <tableExpr> table_reference table_factor join_table
 %type <tableNames> table_name_list
 %type <str> inner_join outer_join natural_join
@@ -259,9 +259,19 @@ select_statement:
 
 // base_select is an unparenthesized SELECT with no order by clause or beyond.
 base_select:
-  SELECT comment_opt cache_opt distinct_opt straight_join_opt select_expression_list from_opt where_expression_opt group_by_opt having_opt
+  with_opt SELECT comment_opt cache_opt distinct_opt straight_join_opt select_expression_list from_opt where_expression_opt group_by_opt having_opt
+  {
+    $$ = &Select{Comments: Comments($3), Cache: $4, Distinct: $5, Hints: $6, SelectExprs: $7, From: $8, Where: NewWhere(WhereStr, $9), GroupBy: GroupBy($10), Having: NewWhere(HavingStr, $11), With: $1}
+  }
+| SELECT comment_opt cache_opt distinct_opt straight_join_opt select_expression_list from_opt where_expression_opt group_by_opt having_opt
   {
     $$ = &Select{Comments: Comments($2), Cache: $3, Distinct: $4, Hints: $5, SelectExprs: $6, From: $7, Where: NewWhere(WhereStr, $8), GroupBy: GroupBy($9), Having: NewWhere(HavingStr, $10)}
+  }
+
+with_opt:
+  WITH table_id as_opt subquery
+  {
+    $$ = TableExprs{&AliasedTableExpr{Expr:$4, As: $2}}
   }
 
 union_lhs:
